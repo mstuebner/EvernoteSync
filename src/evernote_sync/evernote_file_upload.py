@@ -179,7 +179,7 @@ def delete_imported_file(filepath: str) -> bool:
     """
     try:
         os.remove(filepath)
-    except OSError as exc:
+    except OSError:
         LOGGER.warning(f'Cannot delete file: {filepath}')
         return False
 
