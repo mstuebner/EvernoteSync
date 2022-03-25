@@ -28,7 +28,7 @@ import json
 
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as Types
-from evernote.edam.notestore.ttypes import *
+from evernote.edam.notestore.ttypes import NotesMetadataResultSpec, NoteFilter
 
 
 logging.basicConfig(level=logging.INFO)
@@ -39,6 +39,7 @@ def get_configuration():
     """
     Load the JSON configuration file
     """
+    # pylint: disable=consider-using-with, unspecified-encoding
     LOGGER.info('Read configuration')
 
     config = json.load(open('config.json'))
@@ -65,10 +66,10 @@ def connect(config):
     note_store = client.get_note_store()
 
     tags = note_store.listTags()
-    LOGGER.info(f'Number of tags: {len(tags)}')
+    LOGGER.info('Number of tags: %s', len(tags))
 
     notebooks = note_store.listNotebooks()
-    LOGGER.info(f'Number of notebooks: {len(notebooks)}')
+    LOGGER.info('Number of notebooks: %s', len(notebooks))
 
     return client, user_store, note_store, tags, notebooks
 
@@ -84,7 +85,7 @@ def tags_to_guids(taglist, tags, note_store, create_tag=True):
         if not guid and create_tag:
             tag = Types.Tag()
             tag.name = tag_name
-            LOGGER.info(f'Create tag "{tag.name}"')
+            LOGGER.info('Create tag "%s"', tag.name)
             tag = note_store.createTag(tag)
             guid = tag.guid
         taglist[tag_index] = guid
@@ -103,7 +104,7 @@ def notebook_to_guid(notebook_config, notebooks, note_store, create_nb=True):
         new_notebook = Types.Notebook()
         new_notebook.name = notebook
         new_notebook.stack = notebook_config['stack']
-        LOGGER.info(f'Create notebook "{new_notebook.name}"')
+        LOGGER.info('Create notebook "%s"', new_notebook.name)
         new_notebook = note_store.createNotebook(new_notebook)
         guid = new_notebook.guid
 
@@ -112,12 +113,13 @@ def notebook_to_guid(notebook_config, notebooks, note_store, create_nb=True):
 
 def file_notes(notes, mapitem, note_store):
     """
+    Function processes the notes
     """
     for note in notes:
         # build a new title
         # if not note.title.strip()[:1].isdigit():
         note.title = datetime.fromtimestamp(note.created / 1e3).strftime('%Y-%m-%d') + ' - ' + mapitem['title']
-        LOGGER.info(f'New note title: {note.title}')
+        LOGGER.info('New note title: %s', note.title)
 
         note.tagGuids = mapitem['tags']
         note.notebookGuid = mapitem['target notebook']
@@ -126,6 +128,7 @@ def file_notes(notes, mapitem, note_store):
 
 def auto_file(autofile: dict, note_store, tags, notebooks):
     """
+    Function converts notebooks and tags to guids and executes the search then. Next it is calling the note processing.
     """
     spec = NotesMetadataResultSpec()
     spec.includeTitle = True
@@ -142,10 +145,10 @@ def auto_file(autofile: dict, note_store, tags, notebooks):
         note_filter = NoteFilter()
         note_filter.words = autofile_item['search']
 
-        LOGGER.info(f'Search notes for "{note_filter.words}"')
+        LOGGER.info('Search notes for "%s"', note_filter.words)
         # Execute search
         results = note_store.findNotesMetadata(note_filter, 0, 99, spec)
-        LOGGER.info(f'Number of results: {results.totalNotes}')
+        LOGGER.info('Number of results: %s', results.totalNotes)
 
         if results.totalNotes:
             file_notes(results.notes, autofile_item, note_store)
@@ -157,7 +160,7 @@ def main():
     """
     # Preparation
     config, autofile = get_configuration()
-    client, user_store, note_store, tags, notebooks = connect(config=config)
+    _, _, note_store, tags, notebooks = connect(config=config)
 
     # Processing
     auto_file(autofile=autofile, note_store=note_store, tags=tags, notebooks=notebooks)
