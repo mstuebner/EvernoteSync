@@ -50,7 +50,7 @@ AUTH_URL = client.get_authorize_url(request_token)
 print(f'Open: {AUTH_URL} to display access grant page.')
 webbrowser.open(AUTH_URL, new=2)
 
-VALS = None
+VALS = {}
 
 
 # Webserver to handle callback
@@ -66,7 +66,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.end_headers()
         # pylint: disable=global-statement
-        global vals
+        global VALS
         VALS = parse_query_string(self.requestline)
         # pylint: disable=attribute-defined-outside-init
         self.close_connection = True  # Check whether this is required
@@ -77,7 +77,7 @@ httpd.handle_request()
 
 print(f"Auth Token: {request_token['oauth_token']}")
 print(f"Auth Secret: {request_token['oauth_token_secret']}")
-print(f"OAuth verifier: {vals['oauth_verifier']}")
+print(f"OAuth verifier: {VALS['oauth_verifier']}")
 
 access_token = client.get_access_token(
     request_token['oauth_token'],
