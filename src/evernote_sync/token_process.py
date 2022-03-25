@@ -1,31 +1,31 @@
 # https://gist.github.com/brettkelly/5041037
 # Python OAuth example
-from evernote.api.client import EvernoteClient
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import webbrowser
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from evernote.api.client import EvernoteClient
 
 COMSUMER_KEY = ''
 CONSUMER_KEY_SECRET = ''
 CALLBACK_URL = 'http://localhost:5555'
 
 
-##
-# Helper function to turn query string parameters into a
-# Python dictionary
-##
 def parse_query_string(authorize_url):
+    """
+    Helper function to turn query string parameters into a
+    Python dictionary
+    """
     if 'oauth_token' not in authorize_url:
         return {}
 
     uargs = authorize_url.split('?')
-    vals = {}
+    variables = {}
 
     if len(uargs) == 1:
         raise Exception('Invalid Authorization URL')
     for pair in uargs[1].split('&'):
         key, value = pair.split('=', 1)
-        vals[key] = value
-    return vals
+        variables[key] = value
+    return variables
 
 
 ##
@@ -48,13 +48,20 @@ vals = None
 
 # Webserver to handle callback
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-
+    """
+    Handler for http requests, here the callback url to take the oauth_verifier from
+    """
     def do_GET(self):
+        """
+        Method processes the GET requests
+        """
         self.send_response(200)
         self.end_headers()
+        # pylint: disable=global-statement
         global vals
         vals = parse_query_string(self.requestline)
-        self.close_connection = True
+        # pylint: disable=attribute-defined-outside-init
+        self.close_connection = True  # ToDo: Check whether this is required
 
 
 httpd = HTTPServer(('localhost', 5555), SimpleHTTPRequestHandler)
