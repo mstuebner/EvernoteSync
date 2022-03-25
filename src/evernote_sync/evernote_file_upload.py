@@ -1,3 +1,8 @@
+"""
+This script reads a configuration, scans the given directory and collects all files in it. In the next step
+the search result is then worked through and for each found file a note is created and the file is added.
+At the end the processed files are deleted from directory.
+"""
 import os
 import hashlib
 import datetime
@@ -19,6 +24,7 @@ def get_configuration():
     """
     LOGGER.info('Read configuration')
 
+    # pylint: disable=consider-using-with, unspecified-encoding
     config = json.load(open('config.json'))
     autofile = config['autofile']
     config = config['configuration']
@@ -42,10 +48,10 @@ def connect(config):
     note_store = client.get_note_store()
 
     tags = note_store.listTags()
-    LOGGER.info(f'Number of tags: {len(tags)}')
+    LOGGER.info('Number of tags: %s', len(tags))
 
     notebooks = note_store.listNotebooks()
-    LOGGER.info(f'Number of notebooks: {len(notebooks)}\n')
+    LOGGER.info('Number of notebooks: %s\n', len(notebooks))
 
     return client, user_store, note_store, tags, notebooks
 
@@ -61,7 +67,7 @@ def tags_to_guids(taglist, tags, note_store, create_tag=True):
         if not guid and create_tag:
             tag = evtypes.Tag()
             tag.name = tag_name
-            LOGGER.info(f'Create tag "{tag.name}"')
+            LOGGER.info('Create tag "%s"', tag.name)
             tag = note_store.createTag(tag)
             guid = tag.guid
         taglist[tag_index] = guid
@@ -80,7 +86,7 @@ def notebook_to_guid(notebook_config, notebooks, note_store, create_nb=True):
         new_notebook = evtypes.Notebook()
         new_notebook.name = notebook
         new_notebook.stack = notebook_config['stack']
-        LOGGER.info(f'Create notebook "{new_notebook.name}"')
+        LOGGER.info('Create notebook "%s"', new_notebook.name)
         new_notebook = note_store.createNotebook(new_notebook)
         guid = new_notebook.guid
 
@@ -117,8 +123,8 @@ def _create_attachment(filename):
 
     from it, likes them and return the Resource instance.
     """
-    with open(filename, 'rb') as f:
-        pdf_bytes = f.read()
+    with open(filename, 'rb') as input_file:
+        pdf_bytes = input_file.read()
 
     # Create the Data type for evernote that goes into a resource
     pdf_data = evtypes.Data()
@@ -163,7 +169,7 @@ def import_files(files_dict: dict, itemconfigs: dict, note_store, notebooks, tag
                                                 notebook_guid=notebook_guid,
                                                 filepath=_file)
             target_notebook = _config.get('target notebook')
-            LOGGER.info(f'Import file "{_file}" to notebook "{target_notebook}"')
+            LOGGER.info('Import file "%s" to notebook "%s"', _file, target_notebook)
             _prep_note.tagGuids = _config['tags']
             _created_note = note_store.createNote(_prep_note)
             if _created_note:
@@ -180,7 +186,7 @@ def delete_imported_file(filepath: str) -> bool:
     try:
         os.remove(filepath)
     except OSError:
-        LOGGER.warning(f'Cannot delete file: {filepath}')
+        LOGGER.warning('Cannot delete file: %s', filepath)
         return False
 
     return True
@@ -206,14 +212,14 @@ def main():
     """
     # Preparation
     config, autofile = get_configuration()
-    client, user_store, note_store, tags, notebooks = connect(config=config)
+    _, _, note_store, tags, notebooks = connect(config=config)
 
     # Processing
     files_to_import = collect_files(start_directory=config["directory"], itemconfigs=autofile)
     _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
                                   notebooks=notebooks, tags=tags)
 
-    LOGGER.info(f'{len(_notes_created)} notes created')
+    LOGGER.info('%s notes created', len(_notes_created))
 
 
 if __name__ == '__main__':
