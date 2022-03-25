@@ -28,7 +28,7 @@ import json
 
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as Types
-# from evernote.edam.notestore.ttypes import *
+from evernote.edam.notestore.ttypes import NotesMetadataResultSpec, NoteFilter
 
 
 logging.basicConfig(level=logging.INFO)
