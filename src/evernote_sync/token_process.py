@@ -1,5 +1,12 @@
+"""
+This is a complete and full automatic OAuth process with Evernote.
+During the process a local browser is opened to display evernotes access grant page. The
+callback url is then processed by a local web browser which is started to process this
+one GET request.
+
 # https://gist.github.com/brettkelly/5041037
 # Python OAuth example
+"""
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from evernote.api.client import EvernoteClient
@@ -38,12 +45,12 @@ client = EvernoteClient(
     sandbox=True)
 
 request_token = client.get_request_token(CALLBACK_URL)
-auth_url = client.get_authorize_url(request_token)
+AUTH_URL = client.get_authorize_url(request_token)
 
-print(f'Open: {auth_url} to display access grant page.')
-webbrowser.open(auth_url, new=2)
+print(f'Open: {AUTH_URL} to display access grant page.')
+webbrowser.open(AUTH_URL, new=2)
 
-vals = None
+VALS = None
 
 
 # Webserver to handle callback
@@ -51,6 +58,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
     """
     Handler for http requests, here the callback url to take the oauth_verifier from
     """
+    # pylint: disable=invalid-name
     def do_GET(self):
         """
         Method processes the GET requests
@@ -59,9 +67,9 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         # pylint: disable=global-statement
         global vals
-        vals = parse_query_string(self.requestline)
+        VALS = parse_query_string(self.requestline)
         # pylint: disable=attribute-defined-outside-init
-        self.close_connection = True  # ToDo: Check whether this is required
+        self.close_connection = True  # Check whether this is required
 
 
 httpd = HTTPServer(('localhost', 5555), SimpleHTTPRequestHandler)
@@ -74,7 +82,7 @@ print(f"OAuth verifier: {vals['oauth_verifier']}")
 access_token = client.get_access_token(
     request_token['oauth_token'],
     request_token['oauth_token_secret'],
-    vals['oauth_verifier']
+    VALS['oauth_verifier']
 )
 
 # Create a new client using the auth token
