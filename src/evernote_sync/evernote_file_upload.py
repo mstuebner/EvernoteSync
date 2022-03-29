@@ -198,11 +198,16 @@ def collect_files(start_directory: str, itemconfigs: dict):
     and a list of filepathes in it.
     """
     _files_dict = {}
+    _files_collected = 0
 
     for directory in itemconfigs.keys():
-        _file_list = os.listdir(path=os.path.join(start_directory, directory))
-        _files_dict[directory] = [os.path.join(start_directory, directory, item) for item in _file_list]
+        _path = os.path.join(start_directory, directory)
+        if os.path.exists(_path):
+            _file_list = os.listdir(path=_path)
+            _files_dict[directory] = [os.path.join(start_directory, directory, item) for item in _file_list]
+            _files_collected += len(_files_dict[directory])
 
+    LOGGER.info('%s files collected', _files_collected)
     return _files_dict
 
 
