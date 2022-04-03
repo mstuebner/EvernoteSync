@@ -29,8 +29,10 @@ def get_configuration():
     """
     LOGGER.info('Read configuration')
 
-    # pylint: disable=consider-using-with, unspecified-encoding
-    config = json.load(open('config.json'))
+    config_file = 'config.json'
+    with open(config_file, encoding='utf-8') as config_json:
+        config = json.load(config_json)
+
     autofile = config['autofile']
     config = config['configuration']
 
@@ -199,7 +201,7 @@ def delete_imported_file(filepath: str) -> bool:
 
 def collect_files(start_directory: str, itemconfigs: dict):
     """
-    Function collects all files in the start_directory and returns a dict with the sub directory as key
+    Function collects all files in the start_directory and returns a dict with the subdirectory as key
     and a list of filepathes in it.
     """
     _files_dict = {}
