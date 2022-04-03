@@ -2,6 +2,11 @@
 This script reads a configuration, scans the given directory and collects all files in it. In the next step
 the search result is then worked through and for each found file a note is created and the file is added.
 At the end the processed files are deleted from directory.
+
+Developer documentation: https://dev.evernote.com/doc/
+API documentation:  https://dev.evernote.com/doc/reference/
+Sandbox Developer Token:  https://sandbox.evernote.com/api/DeveloperToken.action
+Production Developer Token:  https://www.evernote.com/api/DeveloperToken.action
 """
 import os
 import hashlib
@@ -221,10 +226,12 @@ def main():
 
     # Processing
     files_to_import = collect_files(start_directory=config["directory"], itemconfigs=autofile)
-    _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
-                                  notebooks=notebooks, tags=tags)
 
-    LOGGER.info('%s notes created', len(_notes_created))
+    if len(files_to_import) > 0:
+        _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
+                                      notebooks=notebooks, tags=tags)
+
+        LOGGER.info('%s notes created', len(_notes_created))
 
 
 if __name__ == '__main__':
