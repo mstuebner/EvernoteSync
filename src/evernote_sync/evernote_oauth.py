@@ -162,7 +162,8 @@ class EvernoteOAuth:
         Method gets the access token as parameter, instantiates an EvernoteClient from it and tries to acess the
         UserStore as prove that the access token is valid. Returns True if successful or False otherwise.
         """
-        client = EvernoteClient(token=acc_token)
+        client = EvernoteClient(token=acc_token,
+                                sandbox=settings.sandbox)
         user_store = client.get_user_store()
         user = user_store.getUser()
         if user:
