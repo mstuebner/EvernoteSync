@@ -118,8 +118,8 @@ class EvernoteOAuth:
 
         if url:
             return url, port
-        else:
-            raise Exception('Could not process callback url')
+
+        raise Exception('Could not process callback url')
 
     def handle_access_grant_return(self):
         """
@@ -142,7 +142,7 @@ class EvernoteOAuth:
             auth_verifier
         )
 
-        LOGGER.debug(f'Access token: {acc_token}')
+        LOGGER.debug('Access token: %s', acc_token)
         return acc_token
 
     @staticmethod
