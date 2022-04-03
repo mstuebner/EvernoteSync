@@ -19,6 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install evernote3
+        pip install pydantic
     - name: Analysing the code with pylint
       run: |
         pylint --disable=similarities $(git ls-files '*.py')
