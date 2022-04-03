@@ -54,6 +54,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             variables[key] = value
         return variables
 
+    # pylint: disable=arguments-differ, unused-argument
     def log_message(self, str_format, *args):
         """
         Overrides BaseHTTPRequestHandler.log_message() because this method isn't using logging
@@ -85,7 +86,7 @@ class EvernoteOAuth:
         LOGGER.debug('EvernoteClient instantiated to start token process')
 
         request_token = self.client.get_request_token(self.callback_url)
-        LOGGER.debug(f'request_token: {request_token}')
+        LOGGER.debug('request_token: %s', request_token)
         return request_token
 
     def get_auth_url(self, request_token):
@@ -109,14 +110,16 @@ class EvernoteOAuth:
         """
         Method extracts the url and port to use from callback_url
         """
-        port_separator = ':'
         default_port = 80
 
-        if port_separator in callback_url:
-            _parsed_callback = urlparse(callback_url)
-            url = _parsed_callback.hostname
-            port = _parsed_callback.port if _parsed_callback.port else default_port
+        _parsed_callback = urlparse(callback_url)
+        url = _parsed_callback.hostname
+        port = _parsed_callback.port if _parsed_callback.port else default_port
+
+        if url:
             return url, port
+        else:
+            raise Exception('Could not process callback url')
 
     def handle_access_grant_return(self):
         """
@@ -144,6 +147,9 @@ class EvernoteOAuth:
 
     @staticmethod
     def get_auth_verifier() -> str:
+        """
+        Method returns the oauth_verifier or throws an exception if none was found
+        """
         try:
             oauth_verifier = VALS['oauth_verifier']
             return oauth_verifier

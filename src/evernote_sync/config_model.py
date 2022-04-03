@@ -4,6 +4,7 @@ Implements the configuration pydantic model
 import pydantic
 
 
+# pylint: disable=too-few-public-methods
 class Settings(pydantic.BaseSettings):
     """
     Class for settings, which can be set via environment variables
