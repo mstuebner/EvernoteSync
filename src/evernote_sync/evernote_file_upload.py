@@ -2,6 +2,11 @@
 This script reads a configuration, scans the given directory and collects all files in it. In the next step
 the search result is then worked through and for each found file a note is created and the file is added.
 At the end the processed files are deleted from directory.
+
+Developer documentation: https://dev.evernote.com/doc/
+API documentation:  https://dev.evernote.com/doc/reference/
+Sandbox Developer Token:  https://sandbox.evernote.com/api/DeveloperToken.action
+Production Developer Token:  https://www.evernote.com/api/DeveloperToken.action
 """
 import os
 import hashlib
@@ -12,38 +17,42 @@ import json
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as evtypes
 
+from config_model import Settings
+
+settings = Settings()
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__file__)
 
 NOTE_BASE = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
 
 
-def get_configuration():
+def get_configuration() -> dict:
     """
     Load the JSON configuration file
     """
-    LOGGER.info('Read configuration')
+    LOGGER.info('Read configuration for %s', 'Sandbox' if settings.sandbox else 'Production')
 
-    # pylint: disable=consider-using-with, unspecified-encoding
-    config = json.load(open('config.json'))
+    config_file = 'configs/config.json'
+    with open(config_file, encoding='utf-8') as config_json:
+        config = json.load(config_json)
+
     autofile = config['autofile']
-    config = config['configuration']
 
-    return config, autofile
+    return autofile
 
 
-def connect(config):
+def connect():
     """
     Connect and load a list of tags and notebooks
     """
-    if config['sandbox']:
-        token = config['developerToken']
+    if settings.sandbox:
+        token = settings.token_sandbox
         LOGGER.info('Connect to sandbox')
     else:
-        token = config['productionToken']
+        token = settings.token_production
         LOGGER.info('Connect to production system')
 
-    client = EvernoteClient(token=token, sandbox=config['sandbox'])
+    client = EvernoteClient(token=token, sandbox=settings.sandbox)
     user_store = client.get_user_store()
     note_store = client.get_note_store()
 
@@ -183,6 +192,9 @@ def delete_imported_file(filepath: str) -> bool:
     """
     Receives a filepath and deletes the file it points to.
     """
+    if settings.sandbox:
+        return True
+
     try:
         os.remove(filepath)
     except OSError:
@@ -194,7 +206,7 @@ def delete_imported_file(filepath: str) -> bool:
 
 def collect_files(start_directory: str, itemconfigs: dict):
     """
-    Function collects all files in the start_directory and returns a dict with the sub directory as key
+    Function collects all files in the start_directory and returns a dict with the subdirectory as key
     and a list of filepathes in it.
     """
     _files_dict = {}
@@ -216,15 +228,17 @@ def main():
     Main handler function
     """
     # Preparation
-    config, autofile = get_configuration()
-    _, _, note_store, tags, notebooks = connect(config=config)
+    autofile = get_configuration()
+    _, _, note_store, tags, notebooks = connect()
 
     # Processing
-    files_to_import = collect_files(start_directory=config["directory"], itemconfigs=autofile)
-    _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
-                                  notebooks=notebooks, tags=tags)
+    files_to_import = collect_files(start_directory=settings.directory, itemconfigs=autofile)
 
-    LOGGER.info('%s notes created', len(_notes_created))
+    if len(files_to_import) > 0:
+        _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
+                                      notebooks=notebooks, tags=tags)
+
+        LOGGER.info('%s notes created', len(_notes_created))
 
 
 if __name__ == '__main__':
