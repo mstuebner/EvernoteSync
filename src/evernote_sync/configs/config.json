@@ -1,0 +1,35 @@
+{
+  "configuration": {
+    "directory": "D:\\Benutzer\\mstuebner\\Eigene Dateien\\ScanSnap\\Ev-Autoimport"
+  },
+  "autofile": {
+    "sebastian": {
+      "target notebook": "Sebastian",
+      "stack": "##Automatic Uploads",
+      "tags": [
+        "sebastian"
+      ]
+    },
+    "Rechnungen": {
+      "target notebook": "Rechnungen",
+      "stack": "##Automatic Uploads",
+      "tags": [
+        "rechnung", "rechnung2022"
+      ]
+    },
+    "matthias": {
+      "target notebook": "Matthias",
+      "stack": "##Automatic Uploads",
+      "tags": [
+        "matthias"
+      ]
+    },
+    "matthias-dav": {
+      "target notebook": "DAV",
+      "stack": "##Automatic Uploads",
+      "tags": [
+        "matthias"
+      ]
+    }
+  }
+}
