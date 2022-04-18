@@ -17,40 +17,42 @@ import json
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as evtypes
 
+from config_model import Settings
+
+settings = Settings()
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__file__)
 
 NOTE_BASE = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE en-note SYSTEM "http://xml.evernote.com/pub/enml2.dtd">'
 
 
-def get_configuration():
+def get_configuration() -> dict:
     """
     Load the JSON configuration file
     """
-    LOGGER.info('Read configuration')
+    LOGGER.info('Read configuration for %s', 'Sandbox' if settings.sandbox else 'Production')
 
-    config_file = 'config.json'
+    config_file = 'configs/config.json'
     with open(config_file, encoding='utf-8') as config_json:
         config = json.load(config_json)
 
     autofile = config['autofile']
-    config = config['configuration']
 
-    return config, autofile
+    return autofile
 
 
-def connect(config):
+def connect():
     """
     Connect and load a list of tags and notebooks
     """
-    if config['sandbox']:
-        token = config['developerToken']
+    if settings.sandbox:
+        token = settings.token_sandbox
         LOGGER.info('Connect to sandbox')
     else:
-        token = config['productionToken']
+        token = settings.token_production
         LOGGER.info('Connect to production system')
 
-    client = EvernoteClient(token=token, sandbox=config['sandbox'])
+    client = EvernoteClient(token=token, sandbox=settings.sandbox)
     user_store = client.get_user_store()
     note_store = client.get_note_store()
 
@@ -190,6 +192,9 @@ def delete_imported_file(filepath: str) -> bool:
     """
     Receives a filepath and deletes the file it points to.
     """
+    if settings.sandbox:
+        return True
+
     try:
         os.remove(filepath)
     except OSError:
@@ -223,11 +228,11 @@ def main():
     Main handler function
     """
     # Preparation
-    config, autofile = get_configuration()
-    _, _, note_store, tags, notebooks = connect(config=config)
+    autofile = get_configuration()
+    _, _, note_store, tags, notebooks = connect()
 
     # Processing
-    files_to_import = collect_files(start_directory=config["directory"], itemconfigs=autofile)
+    files_to_import = collect_files(start_directory=settings.directory, itemconfigs=autofile)
 
     if len(files_to_import) > 0:
         _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
