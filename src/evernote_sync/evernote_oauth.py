@@ -7,8 +7,9 @@ import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from evernote.api.client import EvernoteClient
 
-from config_model import settings
+from config_model import Settings
 
+settings = Settings()
 logging.basicConfig(level=logging.WARN)
 LOGGER = logging.getLogger('evernote_oauth')
 
