@@ -1,3 +1,4 @@
 pydantic~=1.9.0
 watchdog~=2.1.7
 evernote3
+pylint==2.13.7
