@@ -1,4 +1,5 @@
 pydantic~=1.9.0
 watchdog~=2.1.7
-evernote3
+evernote3~=1.25.14
 pylint==2.13.7
+pytest==7.1.2
