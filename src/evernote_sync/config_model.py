@@ -22,3 +22,6 @@ class Settings(pydantic.BaseSettings):
 
     sandbox: bool = True
     directory: str = "D:\\Benutzer\\mstuebner\\Eigene Dateien\\ScanSnap\\Ev-Autoimport"
+
+
+settings = Settings()

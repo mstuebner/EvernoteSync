@@ -17,9 +17,8 @@ import json
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as evtypes
 
-from config_model import Settings
+from config_model import settings
 
-settings = Settings()
 logging.basicConfig(level=logging.INFO)
 LOGGER = logging.getLogger(__file__)
 
