@@ -10,7 +10,7 @@ long_description = (this_directory / "README.md").read_text()
 
 setup(
     name="Evernote File Importer",
-    version="0.3.0",
+    version="0.4.0",
     author="Matthias Stuebner",
     author_email="mstuebner@gmail.com",
     url="https://github.com/mstuebner/EvernoteSync",
