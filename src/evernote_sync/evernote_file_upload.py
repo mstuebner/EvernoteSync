@@ -29,7 +29,7 @@ def get_configuration() -> dict:
     """
     Load the JSON configuration file
     """
-    LOGGER.info('Read configuration for %s', 'Sandbox' if settings.sandbox else 'Production')
+    LOGGER.debug('Read configuration for %s', 'Sandbox' if settings.sandbox else 'Production')
 
     config_file = 'configs/config.json'
     with open(config_file, encoding='utf-8') as config_json:
@@ -44,22 +44,23 @@ def connect():
     """
     Connect and load a list of tags and notebooks
     """
+    application = 'Evernote '
     if settings.sandbox:
         token = settings.token_sandbox
-        LOGGER.info('Connect to sandbox')
+        LOGGER.info('Connect to %s sandbox', application)
     else:
         token = settings.token_production
-        LOGGER.info('Connect to production system')
+        LOGGER.info('Connect to %s production system', application)
 
     client = EvernoteClient(token=token, sandbox=settings.sandbox)
     user_store = client.get_user_store()
     note_store = client.get_note_store()
 
     tags = note_store.listTags()
-    LOGGER.info('Number of tags: %s', len(tags))
+    LOGGER.debug('Number of tags: %s', len(tags))
 
     notebooks = note_store.listNotebooks()
-    LOGGER.info('Number of notebooks: %s\n', len(notebooks))
+    LOGGER.debug('Number of notebooks: %s\n', len(notebooks))
 
     return client, user_store, note_store, tags, notebooks
 
@@ -203,26 +204,35 @@ def delete_imported_file(filepath: str) -> bool:
     return True
 
 
-def collect_files(start_directory: str, itemconfigs: dict):
+def collect_files(start_directory: str, itemconfigs: dict) -> dict:
     """
     Function collects all files in the start_directory and returns a dict with the subdirectory as key
     and a list of filepathes in it.
     """
     _files_dict = {}
-    _files_collected = 0
 
     for directory in itemconfigs.keys():
         _path = os.path.join(start_directory, directory)
         if os.path.exists(_path):
             _file_list = os.listdir(path=_path)
             _files_dict[directory] = [os.path.join(start_directory, directory, item) for item in _file_list]
-            _files_collected += len(_files_dict[directory])
 
-    LOGGER.info('%s files collected', _files_collected)
     return _files_dict
 
 
-def main():
+def get_specific_file(start_directory: str, specific_filepath: str) -> dict:
+    """
+    Function returns the required structure in case that there arn't files to be collected, because one specific
+    filepath is given.
+    """
+    path_after_start_directory = os.path.normpath(specific_filepath[len(start_directory)+len(os.sep):])
+    path_components = path_after_start_directory.split(os.sep)
+
+    return {path_components[0]: [specific_filepath]}
+
+
+
+def main(specific_filepath=None):
     """
     Main handler function
     """
@@ -231,14 +241,22 @@ def main():
     _, _, note_store, tags, notebooks = connect()
 
     # Processing
-    files_to_import = collect_files(start_directory=settings.directory, itemconfigs=autofile)
+    if not specific_filepath:
+        files_to_import = collect_files(start_directory=settings.directory, itemconfigs=autofile)
+    else:
+        files_to_import = get_specific_file(start_directory=settings.directory, specific_filepath=specific_filepath)
 
     if len(files_to_import) > 0:
+        LOGGER.info('%s file(s) collected', len(files_to_import))
         _notes_created = import_files(files_dict=files_to_import, itemconfigs=autofile, note_store=note_store,
                                       notebooks=notebooks, tags=tags)
 
-        LOGGER.info('%s notes created', len(_notes_created))
+        LOGGER.info('%s note(s) created', len(_notes_created))
+    else:
+        LOGGER.info('Nothing to import')
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     path = r'D:\Benutzer\mstuebner\Eigene Dateien\ScanSnap\Ev-Autoimport\matth' \
+#            r'ias\PERSONAL_INVESTMENT_REPORT_2022-02.pdf'
+#     main(path)
