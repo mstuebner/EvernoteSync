@@ -13,6 +13,7 @@ import hashlib
 import datetime
 import logging
 import json
+import mimetypes
 
 from evernote.api.client import EvernoteClient
 import evernote.edam.type.ttypes as evtypes
@@ -133,18 +134,18 @@ def _create_attachment(filename):
     from it, likes them and return the Resource instance.
     """
     with open(filename, 'rb') as input_file:
-        pdf_bytes = input_file.read()
+        attachment_bytes = input_file.read()
 
     # Create the Data type for evernote that goes into a resource
-    pdf_data = evtypes.Data()
-    pdf_data.bodyHash = hashlib.md5(pdf_bytes).hexdigest()
-    pdf_data.size = len(pdf_bytes)
-    pdf_data.body = pdf_bytes
+    attachment_data = evtypes.Data()
+    attachment_data.bodyHash = hashlib.md5(attachment_bytes).hexdigest()
+    attachment_data.size = len(attachment_bytes)
+    attachment_data.body = attachment_bytes
 
     # Create a resource for the note that contains the pdf
-    pdf_resource = evtypes.Resource()
-    pdf_resource.data = pdf_data
-    pdf_resource.mime = 'application/pdf'
+    attachment_resource = evtypes.Resource()
+    attachment_resource.data = attachment_data
+    attachment_resource.mime, _ = mimetypes.guess_type(filename)
 
     # Create meta information about the attachment
     res_attributes = evtypes.ResourceAttributes()
@@ -152,9 +153,9 @@ def _create_attachment(filename):
     res_attributes.fileName = os.path.basename(filename)
     res_attributes.timestamp = int(datetime.datetime.now().timestamp())
 
-    pdf_resource.attributes = res_attributes
+    attachment_resource.attributes = res_attributes
 
-    return pdf_resource
+    return attachment_resource
 
 
 def import_files(files_dict: dict, itemconfigs: dict, note_store, notebooks, tags):
