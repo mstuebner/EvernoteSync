@@ -1,4 +1,4 @@
-Place all the secret informations in one file per key, named like the attribute holding ONLY 
+Place all the secret information in one file per key, named like the attribute holding ONLY 
 the value. Files used in evernote_file_upload.py:
 
 - consumer_key
