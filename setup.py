@@ -13,7 +13,7 @@ setup(
     version="0.3.0",
     author="Matthias Stuebner",
     author_email="mstuebner@gmail.com",
-    url="https://pypi.org/",
+    url="https://github.com/mstuebner/EvernoteSync",
     description="An application that monitors a directory structure and automatically imports files into Evernote",
     long_description=long_description,
     long_description_content_type='text/markdown',
