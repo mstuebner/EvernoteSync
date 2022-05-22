@@ -18,3 +18,5 @@ tagged using the configuration from config.json.
 ## Todos
 
 - Write unit tests
+
+- Last update: 2022-05-22
