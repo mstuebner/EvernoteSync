@@ -2,16 +2,16 @@
 Module implements a watchdog that monitors a directory tree for new files to import to Evernote
 """
 import logging
+import ntpath
 import sys
 import time
-import zc.lockfile
-import ntpath
 
+import zc.lockfile
 # Third party modules
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
-import evernote_file_upload
 
+import evernote_file_upload
 # Project owned modules
 from config_model import settings
 
