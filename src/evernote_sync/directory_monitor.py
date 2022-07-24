@@ -5,6 +5,7 @@ import logging
 import sys
 import time
 import zc.lockfile
+import ntpath
 
 # Third party modules
 from watchdog.events import PatternMatchingEventHandler
@@ -33,7 +34,8 @@ def monitoring(monitoring_settings):
 
     def on_created(event):
         """Event handler for CREATE event, fires when a new file is created"""
-        if not event.is_directory:
+        _, filename = ntpath.split(event.src_path)
+        if not event.is_directory and not filename.startswith('.'):
             LOG.info("The file \"%s\" has been created!", event.src_path)
             LOG.info("Starting evernote importer")
             evernote_file_upload.main(event.src_path)
@@ -65,8 +67,9 @@ if __name__ == "__main__":
         settings.sandbox = False  # Override sandbox value which is set to True by default
         monitoring(monitoring_settings=settings)
         LOCK.close()
+
     except zc.lockfile.LockError:
         LOG.warning('Application %s is already running and cannot run twice!', APPLICATION)
         sys.exit(-1)
     except KeyboardInterrupt:
-        LOG.info('%s stpped.', APPLICATION)
+        LOG.info('%s stopped.', APPLICATION)
