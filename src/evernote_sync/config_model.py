@@ -21,7 +21,7 @@ class Settings(pydantic.BaseSettings):
     callback_url: str = 'http://localhost:5555'
 
     sandbox: bool = True
-    directory: str = "D:\\Benutzer\\mstuebner\\Eigene Dateien\\ScanSnap\\Ev-Autoimport"
+    directory: str = "/Users/mstuebner/EvernoteImport"
 
 
 settings = Settings()
