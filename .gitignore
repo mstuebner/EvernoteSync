@@ -1,1 +1,5 @@
 /src/evernote_sync/repo-token.txt
+/src/evernote_sync/secrets/consumer_key
+/src/evernote_sync/secrets/consumer_secret
+/src/evernote_sync/secrets/token_production
+/src/evernote_sync/secrets/token_sandbox
