@@ -232,7 +232,6 @@ def get_specific_file(start_directory: str, specific_filepath: str) -> dict:
     return {path_components[0]: [specific_filepath]}
 
 
-
 def main(specific_filepath=None):
     """
     Main handler function
@@ -255,9 +254,3 @@ def main(specific_filepath=None):
         LOGGER.info('%s note(s) created', len(_notes_created))
     else:
         LOGGER.info('Nothing to import')
-
-
-# if __name__ == '__main__':
-#     path = r'D:\Benutzer\mstuebner\Eigene Dateien\ScanSnap\Ev-Autoimport\matth' \
-#            r'ias\PERSONAL_INVESTMENT_REPORT_2022-02.pdf'
-#     main(path)
